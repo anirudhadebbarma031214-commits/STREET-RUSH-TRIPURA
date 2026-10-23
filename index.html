@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>STREET RUSH: TRIPURA</title>
+<meta name="description" content="A neon arcade street racing game set in Agartala, Tripura.">
+<style>
+:root{--cyan:#28dfff;--blue:#087bff;--ink:#06101e;--panel:rgba(5,13,27,.84)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06101e;color:#f4faff;font-family:Inter,Segoe UI,Arial,sans-serif}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vignette{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(2,7,17,.84),rgba(2,7,17,.15) 65%),linear-gradient(0deg,rgba(2,7,17,.5),transparent 50%);z-index:1}
+.topbar{position:absolute;z-index:3;top:22px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:3px;color:#9bb9cc}
+.brand{font-weight:900;color:white;letter-spacing:2px;font-size:13px}.brand b{color:var(--cyan)}
+.menu{position:absolute;z-index:4;left:clamp(22px,7vw,100px);top:50%;transform:translateY(-47%);width:min(480px,88vw);transition:opacity .35s,transform .35s}
+.kicker{font-size:11px;letter-spacing:5px;color:var(--cyan);font-weight:800;margin-bottom:14px}
+h1{margin:0;font-size:clamp(48px,8vw,96px);line-height:.82;letter-spacing:-5px;font-weight:1000;text-shadow:0 8px 40px #00101f}
+h1 span{display:block;color:var(--cyan);font-size:.54em;letter-spacing:12px;margin-top:17px}
+.tagline{margin:26px 0 30px;color:#b5c9d7;font-size:13px;letter-spacing:2px}
+.buttons{display:grid;gap:10px;width:min(310px,100%)}
+button{font:800 12px inherit;letter-spacing:2px;color:white;cursor:pointer;border:1px solid #20c8f8;background:linear-gradient(100deg,rgba(0,139,210,.34),rgba(0,30,59,.65));padding:16px 19px;text-align:left;min-height:49px;transition:.2s}
+button:hover{background:var(--cyan);color:#04111d;transform:translateX(5px);box-shadow:0 0 24px #1ad4ff55}
+button.secondary{border-color:#34516a;background:#06101dbb;color:#a9c2d3}
+.note{margin-top:23px;font-size:10px;line-height:1.8;letter-spacing:1.3px;color:#7792a6}
+.hud{position:absolute;z-index:4;inset:0;display:none;pointer-events:none}
+.speedbox{position:absolute;left:30px;bottom:27px;border-left:3px solid var(--cyan);padding-left:14px;text-shadow:0 2px 12px #000}
+.speed{font-size:clamp(40px,6vw,66px);font-weight:950;line-height:1}.unit{font-size:10px;letter-spacing:3px;color:var(--cyan)}
+.stats{font-size:11px;letter-spacing:1.5px;color:#b9d0df;margin-top:9px}
+.raceinfo{position:absolute;top:78px;left:30px;font-size:11px;letter-spacing:2px;line-height:2;color:#d5e7f3}
+.nitrobar{width:190px;height:5px;background:#294152;margin-top:7px}.nitrofill{height:100%;width:100%;background:linear-gradient(90deg,#087bff,#28e8ff);box-shadow:0 0 12px #28dfff}
+.pause{position:absolute;right:25px;top:76px;pointer-events:auto}
+.overlay{position:absolute;inset:0;display:none;z-index:5;place-items:center;background:#020812b8;backdrop-filter:blur(8px)}
+.dialog{width:min(430px,90vw);padding:30px;border:1px solid #28dfff88;background:#071426f2;box-shadow:0 0 60px #0099ff24}
+.dialog h2{letter-spacing:3px;margin:0 0 12px}.dialog p{color:#a9c0d0;line-height:1.6;font-size:13px}
+.touch{position:absolute;z-index:4;bottom:22px;right:22px;display:none;gap:8px;align-items:end}
+.touch button{width:54px;height:54px;padding:0;text-align:center;font-size:20px;background:#071426bb;border-radius:8px;touch-action:none}
+.touch .boost{height:68px;width:66px;font-size:10px}
+@media(max-width:650px){.topbar{top:14px;left:16px;right:16px}.menu{top:47%;left:22px}h1{letter-spacing:-3px}.tagline{font-size:11px;margin:20px 0}.buttons{width:245px}button{padding:13px}.note{max-width:260px}.touch{display:flex}.pause{right:15px;top:62px}.raceinfo{top:58px;left:16px}.speedbox{left:16px;bottom:16px}}
+</style></head>
+<body>
+<canvas id="game"></canvas><div class="vignette"></div>
+<div class="topbar"><div class="brand">ANI STUDIO <b>///</b> RACING DIVISION</div><div>AGARTALA, TRIPURA&nbsp; · &nbsp;BUILD 0.1</div></div>
+<section class="menu" id="menu">
+<div class="kicker">INDIA • OPEN ROAD • NO LIMITS</div>
+<h1>STREET<br>RUSH<span>TRIPURA</span></h1>
+<p class="tagline">OWN THE STREETS. CHASE THE SUNSET.</p>
+<div class="buttons"><button id="start">▶ &nbsp; START CITY SPRINT</button><button id="garage" class="secondary">▦ &nbsp; GARAGE / VEHICLES</button><button id="how" class="secondary">⌁ &nbsp; HOW TO DRIVE</button></div>
+<div class="note">RACE LOCATION: AGARTALA CITY<br>MENU SKYLINE: UDAIPUR LAKE-INSPIRED SUNSET<br>EARLY WEB PROTOTYPE · ANI STUDIO</div>
+</section>
+<section class="hud" id="hud"><div class="raceinfo">AGARTALA CITY SPRINT<br><span id="checkpoint">CHECKPOINT 0 / 3</span><br><span id="time">TIME 00:00.0</span><br><div style="margin-top:9px;color:#28dfff">NITRO</div><div class="nitrobar"><div class="nitrofill" id="nitrofill"></div></div></div><button class="pause" id="pause">Ⅱ &nbsp; MENU</button><div class="speedbox"><div class="speed" id="speed">000</div><div class="unit">KM/H</div><div class="stats">WASD / ARROWS · SPACE DRIFT · SHIFT NITRO</div></div></section>
+<div class="overlay" id="overlay"><div class="dialog"><h2 id="dialogTitle">GARAGE</h2><p id="dialogText"></p><button id="closeDialog">GOT IT &nbsp; →</button></div></div>
+<div class="touch" id="touch"><button data-key="ArrowLeft">◀</button><button data-key="ArrowRight">▶</button><button data-key="Space">DRIFT</button><button class="boost" data-key="Shift">NITRO ⚡</button><button data-key="ArrowUp">▲</button></div>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+let W=innerWidth,H=innerHeight,dpr=1,mode='menu',last=0,elapsed=0,speed=0,nitro=100,steer=0,playerX=0,roadScroll=0,checkpoints=0,shake=0;
+const keys=new Set();let skyline=[],buildings=[],stars=[];
+function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);makeScenery()}
+function makeScenery(){skyline=[];buildings=[];stars=[];for(let i=0;i<70;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.42,r:Math.random()*1.5+.3,a:Math.random()*.7+.2});for(let i=0;i<30;i++)skyline.push({x:i*W/20+(Math.random()-.5)*50,h:20+Math.random()*H*.14,w:W/16+Math.random()*40});for(let i=0;i<42;i++)buildings.push({side:i%2?1:-1,z:Math.random()*1.2,w:12+Math.random()*35,h:20+Math.random()*100,tint:Math.random()})}
+function polygon(points,fill,stroke){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+function gradient(y1,y2,stops){let g=ctx.createLinearGradient(0,y1,0,y2);stops.forEach(s=>g.addColorStop(s[0],s[1]));return g}
+function drawBackground(t){let sky=gradient(0,H*.65,[[0,'#030a1b'],[.45,'#18264a'],[.72,'#ba4e56'],[1,'#f3a56b']]);ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+stars.forEach(s=>{ctx.globalAlpha=s.a*(.8+.2*Math.sin(t*.001+s.x));ctx.fillStyle='#d9f4ff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+let sunX=W*.73,sunY=H*.34,sunR=Math.min(W,H)*.085;let glow=ctx.createRadialGradient(sunX,sunY,2,sunX,sunY,sunR*2.3);glow.addColorStop(0,'#ffd6a0aa');glow.addColorStop(1,'#ff785000');ctx.fillStyle=glow;ctx.fillRect(sunX-sunR*2,sunY-sunR*2,sunR*4,sunR*4);ctx.fillStyle='#ffcb91';ctx.beginPath();ctx.arc(sunX,sunY,sunR,0,Math.PI*2);ctx.fill();
+polygon([[0,H*.47],[W*.12,H*.39],[W*.23,H*.46],[W*.37,H*.36],[W*.5,H*.46],[W*.67,H*.37],[W*.82,H*.45],[W,H*.38],[W,H*.67],[0,H*.67]],'#292942');
+polygon([[0,H*.53],[W*.13,H*.47],[W*.27,H*.51],[W*.43,H*.43],[W*.6,H*.52],[W*.78,H*.45],[W,H*.51],[W,H*.71],[0,H*.71]],'#3d3547');
+let lake=gradient(H*.51,H*.82,[[0,'#b85c68'],[.3,'#4b536e'],[1,'#0b2944']]);ctx.fillStyle=lake;ctx.fillRect(0,H*.51,W,H*.32);
+for(let i=0;i<22;i++){let y=H*.54+i*i*H*.00045;ctx.globalAlpha=.12+Math.random()*.07;ctx.fillStyle=i%2?'#ffca9b':'#5ce8ff';ctx.fillRect(W*.45+Math.sin(i*2)*W*.05,y,W*(.04+Math.random()*.17),1+Math.random()*2)}ctx.globalAlpha=1;
+ // stylized lakeside palace silhouette
+ let px=W*.72,py=H*.47,sc=Math.min(W/1000,H/650);ctx.fillStyle='#c6a987';ctx.fillRect(px-65*sc,py,150*sc,48*sc);for(let i=0;i<5;i++){let x=px-52*sc+i*30*sc;ctx.fillRect(x,py-20*sc,15*sc,25*sc);polygon([[x-4*sc,py-20*sc],[x+7*sc,py-36*sc],[x+19*sc,py-20*sc]],'#d2b999')}ctx.fillRect(px-75*sc,py+45*sc,175*sc,5*sc);
+skyline.forEach(b=>{ctx.fillStyle='#101a2d';ctx.fillRect(b.x,H*.55-b.h,b.w,b.h);for(let wx=b.x+5;wx<b.x+b.w-3;wx+=9){for(let wy=H*.55-b.h+7;wy<H*.55-3;wy+=11){if(Math.sin(wx*wy)>.1){ctx.fillStyle='#ffc779';ctx.globalAlpha=.25+(.5*Math.abs(Math.sin(wx+wy)));ctx.fillRect(wx,wy,3,4)}}}});ctx.globalAlpha=1;
+}
+function roadPoint(z){let horizon=H*.47;let p=Math.max(0,Math.min(1,z));let y=horizon+(H-horizon)*p;let half= W*(.025+.48*p);let center=W*.5+Math.sin(roadScroll*.0008+p*2.1)*W*.06*p;return {y,half,center}}
+function drawRoad(t){let horizon=H*.47;polygon([[W*.46,horizon],[W*.54,horizon],[W*1.15,H],[W*-.15,H]],'#252d3b');let top=roadPoint(0),bottom=roadPoint(1);
+polygon([[top.center-top.half,horizon],[top.center+top.half,horizon],[bottom.center+bottom.half,H],[bottom.center-bottom.half,H]],gradient(horizon,H,[[0,'#3a3b47'],[1,'#141c29']]));
+for(let i=0;i<22;i++){let z=((i/22+roadScroll*.00042)%1);let p=roadPoint(z),q=roadPoint(Math.min(1,z+.025));let edge=Math.max(1,z*5);polygon([[p.center-p.half,p.y],[p.center-p.half+edge,p.y],[q.center-q.half+edge,q.y],[q.center-q.half,q.y]],i%2?'#d9d4c4':'#e64e4f');polygon([[p.center+p.half-edge,p.y],[p.center+p.half,p.y],[q.center+q.half,q.y],[q.center+q.half-edge,q.y]],i%2?'#d9d4c4':'#e64e4f')}
+for(let i=0;i<20;i++){let z=((i/20+roadScroll*.0008)%1);let p=roadPoint(z),q=roadPoint(Math.min(1,z+.016));let w=Math.max(1,z*5);polygon([[p.center-w,p.y],[p.center+w,p.y],[q.center+w*1.15,q.y],[q.center-w*1.15,q.y]],'#e9e9dd')}
+for(const b of buildings){let z=(b.z+roadScroll*.00012)%1,p=roadPoint(z),scale=.15+z*1.9,x=p.center+b.side*(p.half+18+z*W*.07);let h=b.h*scale,w=b.w*scale;ctx.fillStyle=['#202c3b','#303341','#3e3036','#253a43'][Math.floor(b.tint*4)];ctx.fillRect(x-w/2,p.y-h,w,h);ctx.fillStyle='#ffca79';for(let wy=p.y-h+8*scale;wy<p.y-3;wy+=12*scale){ctx.fillRect(x-w*.28,wy,Math.max(1,2*scale),Math.max(1,3*scale));ctx.fillRect(x+w*.12,wy,Math.max(1,2*scale),Math.max(1,3*scale))}}
+}
+function drawCar(){let x=W*.5+playerX*W*.25,y=H*.79,scale=Math.min(W/1000,H/650);if(shake>0){x+=(Math.random()-.5)*shake;y+=(Math.random()-.5)*shake}ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
+if(keys.has('Shift')&&nitro>0){ctx.shadowColor='#00d9ff';ctx.shadowBlur=30}
+ctx.fillStyle='#050a11';ctx.beginPath();ctx.ellipse(0,28,85,17,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+polygon([[-74,10],[-62,-25],[-38,-48],[30,-48],[58,-25],[75,10],[67,31],[-66,31]],'#0755a3','#3ee7ff');
+polygon([[-47,-28],[-31,-43],[25,-43],[45,-27]],'#183a51','#63dfff');polygon([[-25,-41],[23,-41],[35,-28],[-36,-28]],'#081c2b');
+polygon([[-67,7],[-58,-12],[-48,-8],[-52,1]],'#bdf9ff');polygon([[67,7],[58,-12],[48,-8],[52,1]],'#bdf9ff');
+ctx.fillStyle='#ff233f';ctx.fillRect(-59,18,24,5);ctx.fillRect(35,18,24,5);ctx.fillStyle='#101721';ctx.fillRect(-75,-1,12,27);ctx.fillRect(63,-1,12,27);
+ctx.fillStyle='#a8c7d6';ctx.fillRect(-19,7,38,3);ctx.restore()}
+function drawMenuCar(){let x=W*.76,y=H*.77,s=Math.min(W/1200,H/700);ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.rotate(-.08);ctx.shadowColor='#00bfff';ctx.shadowBlur=28;polygon([[-190,28],[-165,-20],[-100,-54],[55,-55],[140,-20],[185,20],[165,50],[-160,50]],'#0652a0','#29dfff');ctx.shadowBlur=0;polygon([[-100,-27],[-65,-48],[44,-48],[94,-24]],'#102b3e','#61cfff');polygon([[-80,-44],[0,-44],[24,-26],[-98,-26]],'#081523');ctx.fillStyle='#d4f9ff';ctx.fillRect(-165,4,35,8);ctx.fillRect(130,4,35,8);ctx.fillStyle='#ff3153';ctx.fillRect(-145,34,34,6);ctx.fillRect(112,34,34,6);ctx.fillStyle='#080e18';ctx.fillRect(-130,39,44,25);ctx.fillRect(90,39,44,25);ctx.restore()}
+function frame(t){let dt=Math.min(.04,(t-last)/1000||0);last=t;drawBackground(t);if(mode==='race'){elapsed+=dt;let throttle=keys.has('ArrowUp')||keys.has('w')||keys.has('W'),brake=keys.has('ArrowDown')||keys.has('s')||keys.has('S'),left=keys.has('ArrowLeft')||keys.has('a')||keys.has('A'),right=keys.has('ArrowRight')||keys.has('d')||keys.has('D'),boost=keys.has('Shift')&&nitro>0;
+let target=throttle?(boost?250:190):0;if(brake)target=-35;speed+=(target-speed)*Math.min(1,dt*(throttle?1.1:2));if(boost){nitro=Math.max(0,nitro-dt*27)}else nitro=Math.min(100,nitro+dt*8);
+let turn=(right?1:0)-(left?1:0);steer+=(turn-steer)*Math.min(1,dt*4);playerX=Math.max(-.9,Math.min(.9,playerX+steer*dt*(.7+speed/140)*(keys.has(' ')?1.7:1)));if(keys.has(' '))shake=4+speed*.025;else shake=Math.max(0,shake-dt*20);roadScroll+=speed*dt;drawRoad(t);drawCar();$('speed').textContent=String(Math.round(Math.abs(speed))).padStart(3,'0');$('nitrofill').style.width=nitro+'%';$('time').textContent='TIME '+String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0')+'.'+Math.floor(elapsed*10%10);let newCp=Math.min(3,Math.floor(roadScroll/1400));if(newCp>checkpoints){checkpoints=newCp;$('checkpoint').textContent='CHECKPOINT '+checkpoints+' / 3';if(checkpoints===3){mode='finish';$('dialogTitle').textContent='SPRINT COMPLETE';$('dialogText').textContent='You crossed all three Agartala sprint checkpoints in '+$('time').textContent+'. Ready for another run?';$('overlay').style.display='grid';$('closeDialog').textContent='RACE AGAIN →'}}if(playerX>.83||playerX<-.83)speed*=.985;
+}else{drawRoad(t*.15);drawMenuCar()}
+requestAnimationFrame(frame)}
+function showDialog(title,text){$('dialogTitle').textContent=title;$('dialogText').textContent=text;$('overlay').style.display='grid'}
+function start(){mode='race';elapsed=0;speed=0;nitro=100;roadScroll=0;playerX=0;steer=0;checkpoints=0;$('checkpoint').textContent='CHECKPOINT 0 / 3';$('menu').style.opacity='0';$('menu').style.pointerEvents='none';$('hud').style.display='block';$('overlay').style.display='none'}
+function menu(){mode='menu';$('menu').style.opacity='1';$('menu').style.pointerEvents='auto';$('hud').style.display='none';$('overlay').style.display='none';speed=0}
+$('start').onclick=start;$('pause').onclick=menu;$('garage').onclick=()=>showDialog('GARAGE / VEHICLE LAB','The web prototype currently has one original blue street racer. A larger garage with 50+ Indian-market vehicles, tuning and paint selection is planned for later updates.');$('how').onclick=()=>showDialog('HOW TO DRIVE','W or ↑ accelerates. S or ↓ brakes/reverses. A/D or ←/→ steer. Hold SPACE to drift. Hold SHIFT while accelerating to use nitro. Cross the three glowing race checkpoints. On mobile, use the on-screen controls.');$('closeDialog').onclick=()=>{if(mode==='finish')start();else $('overlay').style.display='none'};
+addEventListener('keydown',e=>{keys.add(e.key);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if(e.key==='Escape'&&mode==='race')menu()});addEventListener('keyup',e=>keys.delete(e.key));document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(k);b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>keys.delete(k)))});
+addEventListener('resize',resize);resize();requestAnimationFrame(frame);
+})();
+</script></body></html>
